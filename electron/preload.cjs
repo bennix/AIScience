@@ -25,7 +25,7 @@ contextBridge.exposeInMainWorld('science', {
   search: (query, source) => ipcRenderer.invoke('search', { query, source }),
   generate: request => ipcRenderer.invoke('generate', request),
   cancel: () => ipcRenderer.invoke('cancel'),
-  importCSV: () => ipcRenderer.invoke('import-csv'),
+  importCSV: options => ipcRenderer.invoke('import-csv', options),
   export: request => ipcRenderer.invoke('export', request),
   saveNotebook: request => ipcRenderer.invoke('save-notebook', request),
   envStatus: () => ipcRenderer.invoke('env-status'),

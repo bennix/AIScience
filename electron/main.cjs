@@ -1,3 +1,5 @@
+const { activeDataset, dataSummaries } = require('./data-context.cjs');
+const { importData } = require('./datasets.cjs');
 const { app, BrowserWindow, ipcMain, dialog, safeStorage, shell, nativeImage } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -26,7 +28,7 @@ async function read(file, fallback) { try { return JSON.parse(await fs.readFile(
 function ipc(name, handler) { ipcMain.handle(name, async (event, ...args) => { if (event.sender !== win.webContents || event.senderFrame?.url !== rendererURL || event.senderFrame !== event.sender.mainFrame) throw new Error('IPC 来源无效'); return handler(...args); }); }
 async function checkMathematics({projectId,title,content,force=false,allowPlainText=false}) {
   bounded(content,200000,'文稿');bounded(title,500,'标题');requireFormalProof(projectId,content);if(config.mathGate===false)return {status:'disabled',approved:true,reviews:[],notice:'数学联合验证已关闭'};
-  const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');const formal=project.formal;const kernelEvidence=formal?formalChecks[formalDigest({statement:formal.statement,proof:formal.proof,mathlib:!!formal.mathlib})]:null;const dataSummary={statistics:project.dataset?.stats||null,formalEvidence:kernelEvidence?.accepted?{statement:kernelEvidence.statement,proof:kernelEvidence.proof,axioms:kernelEvidence.axioms,toolchain:kernelEvidence.toolchain,digest:kernelEvidence.digest}:null};const digest=mathDigest({title,content,dataSummary});
+  const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');const formal=project.formal;const kernelEvidence=formal?formalChecks[formalDigest({statement:formal.statement,proof:formal.proof,mathlib:!!formal.mathlib})]:null;const dataSummary={statistics:dataSummaries(project),formalEvidence:kernelEvidence?.accepted?{statement:kernelEvidence.statement,proof:kernelEvidence.proof,axioms:kernelEvidence.axioms,toolchain:kernelEvidence.toolchain,digest:kernelEvidence.digest}:null};const digest=mathDigest({title,content,dataSummary});
   if(!force&&mathChecks[digest]?.approved)return mathChecks[digest];
   if(mathController)throw new Error('数学联合验证正在进行，请稍候');const apiKey=key();const controller=new AbortController();mathController=controller;
   try{const check=await verifyMath({title,content,dataSummary,apiKey,signal:controller.signal});mathChecks[digest]=check;mathChecks=Object.fromEntries(Object.entries(mathChecks).slice(-100));await atomic(dataPath('math-checks.json'),mathChecks);return check;}finally{if(mathController===controller)mathController=null;}
@@ -78,7 +80,7 @@ app.whenReady().then(async () => {
     return {file,codeCells:blocks.length};
   });
   ipc('env-status', () => environment.status);
-  ipc('env-start', projectId => { if (!projects.some(p => p.id === projectId)) throw new Error('项目不存在'); return environment.start(projectId, projects.find(p => p.id === projectId).dataset); });
+  ipc('env-start', projectId => { if (!projects.some(p => p.id === projectId)) throw new Error('项目不存在'); return environment.start(projectId, activeDataset(projects.find(p => p.id === projectId)), projects.find(p => p.id === projectId).datasets); });
   ipc('env-stop', () => environment.stop());
   ipc('env-open', () => { if (environment.status.phase !== 'ready' || !environment.current?.url) throw new Error('环境尚未就绪'); return shell.openExternal(environment.current.url); });
   ipc('formal-status',()=>formalStatus());
@@ -87,7 +89,7 @@ app.whenReady().then(async () => {
   ipc('verify-formal',async projectId=>{if(formalBusy)throw new Error('形式化工具任务正在运行');const proof=projects.find(p=>p.id===projectId)?.formal;const frozen=formalFreezes[projectId];if(!proof||!frozen||proof.statement!==frozen.statement)throw new Error('请先冻结 Lean 命题，候选证明不能修改它');formalBusy=true;try{const check=await verifyFormal({statement:frozen.statement,proof:proof.proof,mathlib:!!proof.mathlib},dataPath('formal-work'));formalChecks[check.digest]=check;await atomic(dataPath('formal-checks.json'),formalChecks);return check;}finally{formalBusy=false;}});
   ipc('verify-math', request=>checkMathematics(request));
   ipc('load', () => ({ projects, settings: { model: config.model || MODELS[0], hasKey: !!config.key, mathGate:config.mathGate!==false, check: config.check || null, encryptionAvailable: secureStorageAvailable(), baseURL: BASE_URL, models: MODELS, languages: LANGUAGES, embeddingModels: EMBEDDING_MODELS, embeddingModel: config.embeddingModel || EMBEDDING_MODELS[0], inviteURL: INVITE_URL } }));
-  ipc('save', value => { bounded(JSON.stringify(value), 15_000_000, '项目数据'); if (!Array.isArray(value) || value.length > 100) throw new Error('项目数量无效'); saveQueue = saveQueue.catch(() => {}).then(async () => { await atomic(dataPath('projects.json'), value); projects = value; return true; }); return saveQueue; });
+  ipc('save', value => { bounded(JSON.stringify(value), 65_000_000, '项目数据'); if (!Array.isArray(value) || value.length > 100) throw new Error('项目数量无效'); saveQueue = saveQueue.catch(() => {}).then(async () => { await atomic(dataPath('projects.json'), value); projects = value; return true; }); return saveQueue; });
   ipc('settings', async value => { if (!value || !MODELS.includes(value.model)) throw new Error('请选择支持的模型'); if (value.embeddingModel && !EMBEDDING_MODELS.includes(value.embeddingModel)) throw new Error('Embedding 模型无效'); if(value.mathGate!==undefined&&typeof value.mathGate!=='boolean')throw new Error('数学门槛设置无效'); const next = { ...config, mathGate:value.mathGate??config.mathGate??true, model: value.model, embeddingModel: value.embeddingModel || config.embeddingModel || EMBEDDING_MODELS[0] }; if (value.removeKey) { delete next.key; delete next.check; } else if (value.apiKey) { bounded(value.apiKey, 2000, 'API Key'); if (!value.apiKey.trim()) throw new Error('API Key 不能为空白'); if (!secureStorageAvailable()) throw new Error('系统加密存储不可用，不会明文保存密钥'); next.key = safeStorage.encryptString(value.apiKey.trim()).toString('base64'); } if (next.key !== config.key || next.model !== config.model || next.embeddingModel !== config.embeddingModel) delete next.check; await atomic(dataPath('settings.json'), next); config = next; return { hasKey: !!config.key, model: config.model, embeddingModel: config.embeddingModel, mathGate:config.mathGate!==false, check: config.check || null }; });
   ipc('check-api', async () => {
     const apiKey = key(); const checkedKey = config.key; const checkedModel = config.model; const checkedEmbedding = config.embeddingModel; const check = { at: new Date().toISOString(), model: config.model, embeddingModel: config.embeddingModel };
@@ -168,7 +170,12 @@ app.whenReady().then(async () => {
     finally { clearTimeout(timer); if (active === controller) active = null; }
   });
   ipc('cancel', () => { active?.abort(); mathController?.abort(); return true; });
-  ipc('import-csv', async () => { const result = await dialog.showOpenDialog(win, { properties: ['openFile'], filters: [{ name: 'CSV 数据', extensions: ['csv'] }] }); if (result.canceled) return null; const file = result.filePaths[0]; if ((await fs.stat(file)).size > 5_000_000) throw new Error('CSV 不能超过 5 MB'); return { ...parseDataset(await fs.readFile(file, 'utf8')), name: path.basename(file) }; });
+  ipc('import-csv', async ({projectId, directory=false}={}) => {
+    const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');
+    const result=await dialog.showOpenDialog(win,{properties:directory?['openDirectory']:['openFile','multiSelections'],filters:[{name:'科研数据 CSV / Excel',extensions:['csv','xlsx']}]});
+    if(result.canceled)return null;
+    return importData(result.filePaths,project.datasets|| (project.dataset?[project.dataset]:[]));
+  });
   ipc('environment', async () => {
     const result = await dialog.showOpenDialog(win, { title: '选择科研计算环境的导出目录', properties: ['openDirectory', 'createDirectory'] }); if (result.canceled) return null;
     const folder = path.join(result.filePaths[0], `science-environment-${Date.now()}`); await fs.mkdir(folder, { mode: 0o700 });

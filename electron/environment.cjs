@@ -23,7 +23,7 @@ class ResearchEnvironment {
       if(options.server)resolve(p);
     });
   }
-  async start(projectId, dataset) {
+  async start(projectId, dataset, dataFiles = []) {
     if(this.current)throw new Error('请先回收当前托管环境');
     if(typeof projectId!=='string'||!/^[a-zA-Z0-9-]{1,80}$/.test(projectId))throw new Error('项目标识无效');
     const folder=await fs.mkdtemp(path.join(this.base,'environments','env-'));
@@ -46,7 +46,16 @@ class ResearchEnvironment {
           const csv = [dataset.columns.map(quote).join(','), ...dataset.rows.map(row => dataset.columns.map(column => quote(row[column])).join(','))].join('\n');
           await fs.writeFile(path.join(workspace,'dataset.csv'), csv, { mode: 0o600 });
         }
-        const notebook = { cells: [{cell_type:'markdown',metadata:{},source:['# 科研计算记录\n记录数据来源、假说、对照、运行环境和统计计划。代码需要研究者审查后执行。']},{cell_type:'code',metadata:{},execution_count:null,outputs:[],source:[dataset ? "import pandas as pd\ndata = pd.read_csv('dataset.csv')\ndata.describe()" : "import sys\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nprint(sys.version)"]}],metadata:{kernelspec:{display_name:'Python 3',language:'python',name:'python3'}},nbformat:4,nbformat_minor:5};
+        const manifest=[];
+        for(const [fileIndex,file] of dataFiles.entries())for(const [sheetIndex,sheet] of file.sheets.entries()){
+          const relative=`data/file-${fileIndex+1}/sheet-${sheetIndex+1}.csv`;
+          await fs.mkdir(path.dirname(path.join(workspace,relative)),{recursive:true,mode:0o700});
+          const quote=value=>'"'+String(value??'').replaceAll('"','""')+'"';
+          await fs.writeFile(path.join(workspace,relative),[sheet.columns,...sheet.rows.map(row=>sheet.columns.map(c=>row[c]))].map(row=>row.map(quote).join(',')).join('\n'),{mode:0o600});
+          manifest.push({name:file.name,sheet:sheet.sheetName,path:relative});
+        }
+        await fs.writeFile(path.join(workspace,'datasets.json'),JSON.stringify(manifest,null,2),{mode:0o600});
+        const notebook = { cells: [{cell_type:'markdown',metadata:{},source:['# 科研计算记录\n记录数据来源、假说、对照、运行环境和统计计划。代码需要研究者审查后执行。']},{cell_type:'code',metadata:{},execution_count:null,outputs:[],source:[dataFiles.length ? "import json\nimport pandas as pd\nwith open('datasets.json') as f: sources = json.load(f)\ntables = {(s['name'], s['sheet']): pd.read_csv(s['path']) for s in sources}\n{k: v.describe() for k, v in tables.items()}" : dataset ? "import pandas as pd\ndata = pd.read_csv('dataset.csv')\ndata.describe()" : "import sys\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\nprint(sys.version)"]}],metadata:{kernelspec:{display_name:'Python 3',language:'python',name:'python3'}},nbformat:4,nbformat_minor:5};
         try { await fs.writeFile(path.join(workspace,'research.ipynb'),JSON.stringify(notebook,null,2),{flag:'wx',mode:0o600}); } catch(e) { if(e.code!=='EEXIST') throw e; }
         const port=await new Promise((resolve,reject)=>{const server=net.createServer();server.on('error',reject);server.listen(0,'127.0.0.1',()=>{const port=server.address().port;server.close(()=>resolve(port));});});
         const token=randomBytes(32).toString('hex');state.token=token;state.url=`http://127.0.0.1:${port}/lab?token=${token}`;
