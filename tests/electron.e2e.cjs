@@ -29,7 +29,7 @@ const assert = require('node:assert/strict');
       globalThis.fetch = async (url,options={}) => {
         if(String(url).includes('europepmc')) return new Response(JSON.stringify({resultList:{result:[{id:'123',source:'MED',title:'Sleep and memory: test fixture',authorString:'Test Authors',pubYear:'2025',doi:'10.1000/test',abstractText:'Fixture metadata, not a real search result.'}]}}),{headers:{'Content-Type':'application/json'}});
         const body=JSON.parse(options.body);
-        if(String(url).endsWith('/embeddings'))return new Response(JSON.stringify({data:body.input.map((_,index)=>({index,embedding:[1,0.5,0.1]}))}));
+        if(String(url).endsWith('/embeddings'))return new Response(JSON.stringify({data:(Array.isArray(body.input)?body.input:[body.input]).map((_,index)=>({index,embedding:[1,0.5,0.1]}))}));
         if(body.stream===false)return new Response(JSON.stringify({choices:[{message:{content:'OK'}}]}));
         globalThis.__calls.push(body);
         const payload=globalThis.__calls.length===1?'# 待验证假说\n睡眠与记忆可能相关。必须通过对照实验验证。':'# 引导后的研究\n已按要求加入阴性对照。';

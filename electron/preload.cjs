@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('science', {
   load: () => ipcRenderer.invoke('load'),
   save: projects => ipcRenderer.invoke('save', projects),
   checkAPI: () => ipcRenderer.invoke('check-api'),
+  onRAGProgress: callback => {const handler=(_,value)=>callback(value);ipcRenderer.on('rag-progress',handler);return ()=>ipcRenderer.removeListener('rag-progress',handler);},
   indexRAG: projectId => ipcRenderer.invoke('rag-index', projectId),
   importDocument: projectId => ipcRenderer.invoke('import-document', projectId),
   paperFulltext: request => ipcRenderer.invoke('paper-fulltext', request),

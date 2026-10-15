@@ -6,7 +6,7 @@ const path = require('node:path');
 const { randomUUID } = require('node:crypto');
 const { spawn } = require('node:child_process');
 const os = require('node:os');
-const { EMBEDDING_MODELS, MODELS, BASE_URL, INVITE_URL, bounded, parseDataset, latexDocument, buildMessages, parseRevision } = require('./core.cjs');
+const { EMBEDDING_MODELS, MODELS, BASE_URL, INVITE_URL, bounded, parseDataset, latexDocument, buildMessages, parseRevision, parseMathDraft } = require('./core.cjs');
 const { officeText } = require('./office.cjs');
 const { LocalRAG, embed } = require('./rag.cjs');
 const { AttachmentStore, validateAttachmentIds, MAX_BYTES } = require('./attachments.cjs');
@@ -101,7 +101,7 @@ app.whenReady().then(async () => {
     if(config.key!==checkedKey||config.model!==checkedModel||config.embeddingModel!==checkedEmbedding)throw new Error('设置已改变，请重新检测当前配置');
     config.check=check;await atomic(dataPath('settings.json'),config);return check;
   });
-  ipc('rag-index', async projectId => { if (ragBusy) throw new Error('索引任务正在运行');const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');ragBusy=true;try{return await rag.index(project,{apiKey:key(),model:config.embeddingModel||EMBEDDING_MODELS[0]});}finally{ragBusy=false;} });
+  ipc('rag-index', async projectId => { if (ragBusy) throw new Error('索引任务正在运行');const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');ragBusy=true;try{return await rag.index(project,{apiKey:key(),model:config.embeddingModel||EMBEDDING_MODELS[0]},progress=>win.webContents.send('rag-progress',{projectId,...progress}));}finally{ragBusy=false;} });
   ipc('import-document', async projectId => {
     if(!projects.some(p=>p.id===projectId))throw new Error('项目不存在');const result=await dialog.showOpenDialog(win,{properties:['openFile'],filters:[{name:'科研资料',extensions:['pdf','txt','md','csv','json','docx','xlsx','pptx']}]});if(result.canceled)return null;
     const file=result.filePaths[0];if((await fs.stat(file)).size>20_000_000)throw new Error('资料不能超过 20 MB');let content;
@@ -163,7 +163,7 @@ app.whenReady().then(async () => {
         for(const call of calls){if(controller.signal.aborted)throw new Error('任务已停止');let result;try{result=await codeReferences.invoke(call.function.name,JSON.parse(call.function.arguments),allowedReferences);}catch(e){result={error:e.message};}messages.push({role:'tool',tool_call_id:call.id,content:JSON.stringify(result)});win.webContents.send('code-evidence',{id:request.id,tool:call.function.name,result});}
         continue;
       }
-      if (!content) throw new Error('模型未返回文本内容'); if(request.mode==='revision')parseRevision(content); return content;
+      if (!content) throw new Error('模型未返回文本内容'); if(request.mode==='revision')parseRevision(content);if(request.mode==='mathdraft')parseMathDraft(content); return content;
       }
       throw new Error('本轮代码参考读取已到上限，请分阶段继续研究');
     } catch (e) { if (controller.signal.aborted) throw new Error('任务已停止或超过 3 分钟时限；当前输出尚未完成'); throw new Error(e.message.replaceAll(apiKey, '[REDACTED]')); }
