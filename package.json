@@ -1,6 +1,6 @@
 {
   "name": "science-workbench",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "description": "Evidence-led AI research workbench powered by ZenMux",
   "main": "electron/main.cjs",

@@ -43,6 +43,16 @@ class LocalRAG {
   file(projectId){if(!/^[\w-]{1,80}$/.test(projectId))throw new Error('项目 ID 无效');return path.join(this.folder,`${projectId}.json`);}
   async read(projectId){try{return JSON.parse(await fs.readFile(this.file(projectId),'utf8'));}catch(e){if(e.code==='ENOENT')return null;throw new Error('本地索引读取失败，请重建索引');}}
   async index(project,credentials,onProgress=()=>{}){const chunks=chunksFor(project);if(!chunks.length)throw new Error('请先收藏论文、添加笔记或导入资料');const options={...this.options,...credentials};const old=await this.read(project.id);const previous=new Map(old?.model===options.model?old.chunks.map(c=>[c.hash,c.vector]):[]);let downloaded=0;onProgress({completed:0,total:chunks.length});const missing=chunks.filter(c=>!previous.has(c.hash));for(let i=0;i<missing.length;i+=16){const batch=missing.slice(i,i+16);const vectors=await embed({...options,input:batch.map(c=>c.content)});batch.forEach((c,j)=>previous.set(c.hash,vectors[j]));downloaded+=batch.length;onProgress({completed:chunks.length-missing.length+downloaded,total:chunks.length});}const result={model:options.model,createdAt:new Date().toISOString(),fingerprint:hash(JSON.stringify(chunks.map(c=>[c.id,c.hash]))),chunks:chunks.map(c=>({...c,vector:previous.get(c.hash)}))};await fs.mkdir(this.folder,{recursive:true,mode:0o700});const file=this.file(project.id),tmp=`${file}.tmp`;await fs.writeFile(tmp,JSON.stringify(result),{mode:0o600});await fs.rename(tmp,file);return {count:chunks.length,embedded:downloaded,model:result.model,createdAt:result.createdAt};}
+  async prune(project){
+    const index=await this.read(project.id);if(!index)return null;
+    const chunks=chunksFor(project),current=new Map(chunks.map(c=>[c.id,c.hash]));
+    index.chunks=index.chunks.filter(c=>current.get(c.id)===c.hash);
+    if(!index.chunks.length){await fs.rm(this.file(project.id),{force:true});return null;}
+    const complete=index.chunks.length===chunks.length;
+    if(complete)index.fingerprint=hash(JSON.stringify(chunks.map(c=>[c.id,c.hash])));
+    const file=this.file(project.id),tmp=`${file}.tmp`;await fs.writeFile(tmp,JSON.stringify(index),{mode:0o600});await fs.rename(tmp,file);
+    return complete?{count:index.chunks.length,embedded:0,model:index.model,createdAt:index.createdAt}:null;
+  }
   async retrieve(project,query,credentials){const index=await this.read(project.id);if(!index)throw new Error('尚未建立 RAG 索引，请在“论文与证据”中建立索引');if(index.model!==credentials.model)throw new Error('Embedding 模型已更改，请重建 RAG 索引');const chunks=chunksFor(project);if(index.fingerprint!==hash(JSON.stringify(chunks.map(c=>[c.id,c.hash]))))throw new Error('项目资料已变化，请更新 RAG 索引');const [vector]=await embed({...this.options,...credentials,input:[query]});const focus=project.papers?.find(p=>p.id===project.focusPaperId)?.citationId;return index.chunks.filter(c=>!focus||c.sourceId===focus).map(c=>({id:c.id,sourceId:c.sourceId,title:c.title,url:c.url,start:c.start,end:c.end,content:c.content,score:cosine(vector,c.vector)})).sort((a,b)=>b.score-a.score).slice(0,6);}
 }
 module.exports={LocalRAG,chunksFor,cosine,validateVectors,embed};

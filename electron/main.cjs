@@ -101,6 +101,7 @@ app.whenReady().then(async () => {
     if(config.key!==checkedKey||config.model!==checkedModel||config.embeddingModel!==checkedEmbedding)throw new Error('设置已改变，请重新检测当前配置');
     config.check=check;await atomic(dataPath('settings.json'),config);return check;
   });
+  ipc('prune-rag', async projectId=>{if(ragBusy||active)throw new Error('请先等待索引或研究任务完成');const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');ragBusy=true;try{return await rag.prune(project);}finally{ragBusy=false;}});
   ipc('rag-index', async projectId => { if (ragBusy) throw new Error('索引任务正在运行');const project=projects.find(p=>p.id===projectId);if(!project)throw new Error('项目不存在');ragBusy=true;try{return await rag.index(project,{apiKey:key(),model:config.embeddingModel||EMBEDDING_MODELS[0]},progress=>win.webContents.send('rag-progress',{projectId,...progress}));}finally{ragBusy=false;} });
   ipc('import-document', async projectId => {
     if(!projects.some(p=>p.id===projectId))throw new Error('项目不存在');const result=await dialog.showOpenDialog(win,{properties:['openFile'],filters:[{name:'科研资料',extensions:['pdf','txt','md','csv','json','docx','xlsx','pptx']}]});if(result.canceled)return null;
