@@ -1,0 +1,39 @@
+{
+  "version": "0.3.1",
+  "features": [
+    "paper search/library dedup and focused follow-up",
+    "up to five CSV/XLSX files or recursive directory import",
+    "per-sheet statistics and managed environment snapshots",
+    "Embedding single-input compatibility and inline indexing errors/progress",
+    "AI mathematical initialization drafts, explicit adoption and Lean proof workflow"
+  ],
+  "tests": {
+    "unit": 25,
+    "paperAndDataUI": "passed; offline fixtures",
+    "mathDraftAndRAGErrorRetry": "passed; mocked model",
+    "desktopSourceAndSignedPackage": "passed; mocked models; package uses isolated mock keychain",
+    "attachmentsRevision": "passed",
+    "mathGate": "passed",
+    "packageMatchesSources": true
+  },
+  "liveZenMux": {
+    "embedding": "google/gemini-embedding-2",
+    "chunks": 30,
+    "dimensions": 3072,
+    "allFinite": true,
+    "keyExposed": false,
+    "chatMathDraft": "mocked only"
+  },
+  "macOS": {
+    "appNotarization": "Accepted",
+    "appNotarizationId": "5cb11d88-089e-4ce9-8346-3d902dbe9a5a",
+    "dmgNotarization": "Accepted",
+    "dmgNotarizationId": "0278368e-fc28-41d8-941d-a0443bbe55ff",
+    "stapler": "passed",
+    "gatekeeper": "accepted: Notarized Developer ID",
+    "sha256": "b93f4c4ea9851c04978197bc75e02e244548fd256d05779ae54a32ac297fc380"
+  },
+  "githubBuild": "https://github.com/bennix/AIScience/actions/runs/38822283206",
+  "pentagi": "not run",
+  "windowsLinux": "all builds succeeded; preview packages; Windows unsigned"
+}
