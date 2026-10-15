@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
   const temp = await fs.mkdtemp(path.join(os.tmpdir(),'science-e2e-'));
   let app;
   try {
-    app = await electron.launch({ args: [path.resolve('.'), `--user-data-dir=${temp}`] });
+    app = await electron.launch(process.env.SCIENCE_EXECUTABLE ? { executablePath: process.env.SCIENCE_EXECUTABLE, args: [`--user-data-dir=${temp}`, ...(process.env.SCIENCE_MOCK_KEYCHAIN==='1'?['--use-mock-keychain']:[])] } : { args: [path.resolve('.'), `--user-data-dir=${temp}`] });
     const page = await app.firstWindow(); const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     await page.locator('#project-title').waitFor();

@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "macOS": {
+    "architecture": "arm64",
+    "appNotarizationId": "1d470746-164b-4231-91c6-b698e26e1b89",
+    "dmgNotarizationId": "b8efa21b-0163-46bc-bb12-2e827f84500b",
+    "appNotarization": "Accepted",
+    "dmgNotarization": "Accepted",
+    "staplerApp": "passed",
+    "staplerDMG": "passed",
+    "codesignDeepStrict": "passed",
+    "gatekeeperApp": "accepted: Notarized Developer ID",
+    "gatekeeperDMG": "accepted: Notarized Developer ID",
+    "sha256": "15a0e1bf9f34b18976f451fa1b9539d911a8bfb8690e5295323672925b8fcfcc"
+  },
+  "githubBuilds": {
+    "workflow": "https://github.com/bennix/AIScience/actions/runs/38815291909",
+    "windowsExe": "success; unsigned preview",
+    "linuxDebRpm": "success; preview"
+  },
+  "tests": {
+    "unit": 20,
+    "sourceDesktop": "passed",
+    "signedPackagedDesktop": "passed with isolated userData and Chromium mock keychain; AI/embedding fixtures, real PDF parse/export",
+    "nativeSignedKeychain": "requires user confirmation in macOS SecurityAgent; automation cannot operate this security window",
+    "landing": "passed desktop/mobile, no horizontal overflow, real package naming, SHA links and unavailable-release fallback"
+  },
+  "liveZenMux": "not tested without valid API key",
+  "pentagi": "not run"
+}
