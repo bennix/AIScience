@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+*.log
+
+release/
+work/
+build/icon.iconset/
+.DS_Store
+*.p12
+*.pfx
+*.pem
+*.key
+.env.*
+!.env.example

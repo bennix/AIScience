@@ -1,0 +1,12 @@
+const{execFileSync}=require('node:child_process');const fs=require('node:fs'),path=require('node:path'),{createHash}=require('node:crypto');
+const version=require('../package.json').version;
+const file=path.resolve(process.argv[2]||`release/AIScience-${version}-mac-arm64.dmg`);
+const run=(command,args)=>execFileSync(command,args,{stdio:'inherit'});
+if(process.platform!=='darwin'||!file.endsWith('.dmg')||!fs.existsSync(file))throw Error('Provide a built macOS DMG');
+run('xcrun',['notarytool','submit',file,'--keychain-profile',process.env.NOTARY_PROFILE||'AIScience','--wait','--output-format','json']);
+run('xcrun',['stapler','staple',file]);run('xcrun',['stapler','validate',file]);
+run('spctl',['--assess','--type','open','--context','context:primary-signature','--verbose=2',file]);
+const hash=createHash('sha256').update(fs.readFileSync(file)).digest('hex');fs.writeFileSync(file+'.sha256',`${hash}  ${path.basename(file)}\n`);
+const latest=path.resolve('release/latest-notarized');fs.mkdirSync(latest,{recursive:true});for(const old of fs.readdirSync(latest))if(/^AIScience-.*\.(dmg|sha256)$/.test(old))fs.unlinkSync(path.join(latest,old));
+fs.copyFileSync(file,path.join(latest,path.basename(file)));fs.copyFileSync(file+'.sha256',path.join(latest,path.basename(file)+'.sha256'));
+console.log('Validated notarized DMG retained at '+latest);
