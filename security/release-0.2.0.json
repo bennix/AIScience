@@ -11,7 +11,8 @@
     "codesignDeepStrict": "passed",
     "gatekeeperApp": "accepted: Notarized Developer ID",
     "gatekeeperDMG": "accepted: Notarized Developer ID",
-    "sha256": "15a0e1bf9f34b18976f451fa1b9539d911a8bfb8690e5295323672925b8fcfcc"
+    "sha256": "15a0e1bf9f34b18976f451fa1b9539d911a8bfb8690e5295323672925b8fcfcc",
+    "mountedDMG": "passed: disk-image checksum, application, Applications link and embedded app staple validation"
   },
   "githubBuilds": {
     "workflow": "https://github.com/bennix/AIScience/actions/runs/38815291909",
@@ -22,9 +23,11 @@
     "unit": 20,
     "sourceDesktop": "passed",
     "signedPackagedDesktop": "passed with isolated userData and Chromium mock keychain; AI/embedding fixtures, real PDF parse/export",
-    "nativeSignedKeychain": "requires user confirmation in macOS SecurityAgent; automation cannot operate this security window",
-    "landing": "passed desktop/mobile, no horizontal overflow, real package naming, SHA links and unavailable-release fallback"
+    "nativeSignedKeychain": "passed after user confirmation: signed application, real macOS encryption, no plaintext on disk, decrypted key into mocked request; no live API calls",
+    "landing": "passed desktop/mobile, no horizontal overflow, real package naming, SHA links and unavailable-release fallback",
+    "nativeFullDesktop": "native key access and research flow passed up to screenshot; screenshot timed out. Full packaged desktop suite passed separately with mock keychain."
   },
   "liveZenMux": "not tested without valid API key",
-  "pentagi": "not run"
+  "pentagi": "not run",
+  "publicDownloads": "all four installer URLs returned HTTP 200; SHA-256 text matches GitHub upload digests"
 }
