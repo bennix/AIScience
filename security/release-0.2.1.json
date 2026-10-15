@@ -1,0 +1,32 @@
+{
+  "version": "0.2.1",
+  "features": [
+    "SSE incremental Markdown",
+    "local KaTeX with four delimiter forms",
+    "safe href/url in text and math",
+    "pending and malformed formula handling",
+    "code-fence exclusion"
+  ],
+  "tests": {
+    "unit": 20,
+    "sourceDesktop": "passed",
+    "streamMarkdownMathSource": "passed with controlled SSE and mocked model",
+    "streamMarkdownMathSignedPackage": "passed with controlled SSE, mocked model and isolated mock keychain",
+    "CSP": "unchanged; no violations in rendering test; local fonts loaded",
+    "links": "HTTPS labels render; unsafe URLs and HTML directives blocked",
+    "reload": "passed after waiting for autosave"
+  },
+  "macOS": {
+    "appNotarization": "Accepted",
+    "appNotarizationId": "6e05d9d6-0a01-4ea5-9204-ec9b06de3ff9",
+    "dmgNotarization": "Accepted",
+    "dmgNotarizationId": "78c2c89a-e743-4369-87b4-e50fac11451e",
+    "stapler": "passed for application and DMG",
+    "gatekeeper": "accepted: Notarized Developer ID",
+    "sha256": "9c8b70bb992288c91e7a58e4c009b79397e9767145e9acb4b8ff416d07db2e37"
+  },
+  "githubBuild": "https://github.com/bennix/AIScience/actions/runs/38818439505",
+  "windowsLinux": "builds succeeded; preview packages, Windows unsigned",
+  "liveZenMux": "not tested without API Key",
+  "pentagi": "not run"
+}
