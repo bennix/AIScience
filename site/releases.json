@@ -1,37 +1,37 @@
 {
-  "tag_name": "v0.3.1",
+  "tag_name": "v0.3.2",
   "assets": [
     {
-      "name": "AIScience-0.3.1-linux-amd64.deb",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-linux-amd64.deb"
+      "name": "AIScience-0.3.2-linux-amd64.deb",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-linux-amd64.deb"
     },
     {
-      "name": "AIScience-0.3.1-linux-amd64.deb.sha256",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-linux-amd64.deb.sha256"
+      "name": "AIScience-0.3.2-linux-amd64.deb.sha256",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-linux-amd64.deb.sha256"
     },
     {
-      "name": "AIScience-0.3.1-linux-x86_64.rpm",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-linux-x86_64.rpm"
+      "name": "AIScience-0.3.2-linux-x86_64.rpm",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-linux-x86_64.rpm"
     },
     {
-      "name": "AIScience-0.3.1-linux-x86_64.rpm.sha256",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-linux-x86_64.rpm.sha256"
+      "name": "AIScience-0.3.2-linux-x86_64.rpm.sha256",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-linux-x86_64.rpm.sha256"
     },
     {
-      "name": "AIScience-0.3.1-mac-arm64.dmg",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-mac-arm64.dmg"
+      "name": "AIScience-0.3.2-mac-arm64.dmg",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-mac-arm64.dmg"
     },
     {
-      "name": "AIScience-0.3.1-mac-arm64.dmg.sha256",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-mac-arm64.dmg.sha256"
+      "name": "AIScience-0.3.2-mac-arm64.dmg.sha256",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-mac-arm64.dmg.sha256"
     },
     {
-      "name": "AIScience-0.3.1-win-x64.exe",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-win-x64.exe"
+      "name": "AIScience-0.3.2-win-x64.exe",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-win-x64.exe"
     },
     {
-      "name": "AIScience-0.3.1-win-x64.exe.sha256",
-      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.1/AIScience-0.3.1-win-x64.exe.sha256"
+      "name": "AIScience-0.3.2-win-x64.exe.sha256",
+      "browser_download_url": "https://github.com/bennix/AIScience/releases/download/v0.3.2/AIScience-0.3.2-win-x64.exe.sha256"
     }
   ]
 }
