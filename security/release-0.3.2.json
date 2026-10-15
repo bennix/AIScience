@@ -1,0 +1,22 @@
+{
+  "version": "0.3.2",
+  "tests": {
+    "unit": 26,
+    "evidenceDeletionUI": "passed with isolated fixtures and mocked embeddings",
+    "persistedDeletion": "passed",
+    "vectorPruning": "passed; zero additional embedding requests",
+    "lastSourceRemovesIndex": "passed",
+    "installedApplication": "updated; delete buttons visible; existing user evidence retained"
+  },
+  "macOS": {
+    "appNotarization": "Accepted",
+    "appNotarizationId": "d54efd89-2501-4394-bc75-eb277c5ed23d",
+    "dmgNotarization": "Accepted",
+    "dmgNotarizationId": "dfc33cb2-2e34-474a-a7f0-4f544e0004fb",
+    "gatekeeper": "accepted: Notarized Developer ID",
+    "sha256": "a59265563b4fd5f84f6ae2d0d3b77c24cc237d1651f61f4269e1259693e77d3e"
+  },
+  "githubBuild": "https://github.com/bennix/AIScience/actions/runs/38823674173",
+  "windowsLinux": "builds succeeded; preview versions; Windows unsigned",
+  "pentagi": "not run"
+}
