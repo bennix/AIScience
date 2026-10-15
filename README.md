@@ -85,3 +85,11 @@ PentAGI 未执行：用户选择暂不配置模型 Key。Docker 独立 Colima �
 本地 macOS 发布：在钥匙串中创建名为 `AIScience` 的 notarytool 凭证，确保 Developer ID Application 私钥可用，然后执行 `npm ci`、`npm run dist:mac`、`npm run notarize`。凭证不写入项目，脚本只引用钥匙串 profile；可通过 `NOTARY_PROFILE` 更换 profile 名称。不要把 App 专用密码、P12 或密钥放进仓库。Windows / Linux 构建分别使用 `npm run dist:win`、`npm run dist:linux`。
 
 网站为 `site/` 下静态页面，经 GitHub Pages workflow 发布。下载列表优先读取最新 GitHub Release，失败时使用 `site/releases.json`；尚未构建的资产显示发布状态，不制造无效的下载按钮。可用 `node tests/site.e2e.cjs` 验证响应式布局、下载链接与回退。
+
+## 流式 Markdown / LaTeX（0.2.1）
+
+AI 对话使用 SSE 增量输出，生成完成前即可查看已收到的内容；同一帧合并渲染，避免每个字符重复排版。标题、列表、表格、引用和代码块按 Markdown 显示。对话、报告预览和修订说明共享本地 KaTeX 渲染，支持 `$…$`、`$$…$$`、`\(...\)`、`\[…\]`；代码块中的公式保持源码。公式未闭合时先显示待完成内容，闭合后排版；语法错误会保留原文与提示。
+
+`\href{https://…}{文字}` 和 `\url{https://…}` 可显示 HTTPS 链接；危险协议和 TeX HTML 指令不被执行。链接点击仍受应用主进程的科研站点白名单限制。字体、CSS 和渲染库随应用打包，无需额外 CDN。Markdown HTML 先经 DOMPurify 清理，随后只由 KaTeX 创建公式节点；宏展开、公式长度和显示尺寸有上限。
+
+`npm run test:stream-math` 使用可控 SSE 与模拟模型，检查生成结束前的增量显示、四种公式分隔符、字体/CSP、代码块、链接、危险输入以及报告重载。真实 ZenMux 兼容性仍须有效 Key 联调。

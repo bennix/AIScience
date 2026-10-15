@@ -46,3 +46,9 @@ Lean 证明在独立 Docker 容器内验证：禁网、只读根文件系统、�
 macOS 发布使用 Developer ID、hardened runtime 和 Apple 公证；公证凭证只保存在系统钥匙串，源代码和 GitHub Actions 不包含 Apple 密码或签名私钥。DMG 的发布需经过 stapler validate 与 spctl 检查。Apple 公证是分发校验，不能替代安全审计或科研结论验证。
 
 跨平台构建使用 electron-builder 26.15.3。运行时依赖 `npm audit --omit=dev` 无已知漏洞；当前构建工具链存在 8 项 moderate 间接告警，源于 @electron/get / global-agent 的 sprintf-js 依赖，暂无上游修复，不计作已经消除。Windows 包尚无 Authenticode 签名。Linux 拒绝使用 safeStorage basic_text 后端持久化 API Key。
+
+## 0.2.1 流式公式渲染
+
+Markdown 先由 DOMPurify 清理，禁止原始 MathML、SVG、样式与执行性 HTML，再将独立的公式槽交给本地 KaTeX 生成节点。CSP 未放宽，字体和 CSS 随应用提供。公式长度上限 8,000 字符、宏展开最多 1,000 次、显示尺寸有上限；递归宏和错误公式不会阻塞后续输出。
+
+TeX 的 trust 回调只允许无内嵌用户名/密码的 HTTPS href/url，其他外部链接与 HTML 指令拒绝执行；点击后仍由主进程站点白名单检查。危险链接不显示为可点击 URL；未闭合公式在流式过程中保留待完成文本。测试以可控 SSE 验证完成前增量渲染、代码块排除、Markdown XSS、危险 TeX、CSP/字体、链接和重载。运行时依赖审计无已知漏洞；真实 ZenMux 本轮仍未联调。

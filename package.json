@@ -1,13 +1,13 @@
 {
   "name": "science-workbench",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Evidence-led AI research workbench powered by ZenMux",
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check electron/main.cjs && node --check electron/core.cjs && node --check electron/math-typeset.cjs && node --check electron/environment.cjs && node --check electron/rag.cjs && node --check electron/attachments.cjs && node --check electron/office.cjs && node --check electron/code-reference.cjs && node --check electron/languages.cjs && node --check electron/math-verification.cjs && node --check electron/formal-proof.cjs && node --check electron/preload.cjs && node --check src/app.js",
+    "check": "node --check electron/main.cjs && node --check electron/core.cjs && node --check electron/math-typeset.cjs && node --check electron/environment.cjs && node --check electron/rag.cjs && node --check electron/attachments.cjs && node --check electron/office.cjs && node --check electron/code-reference.cjs && node --check electron/languages.cjs && node --check electron/math-verification.cjs && node --check electron/formal-proof.cjs && node --check electron/preload.cjs && node --check src/markdown.js && node --check src/app.js",
     "package": "electron-packager . 'Science Workbench' --platform=darwin --arch=arm64 --out=dist --overwrite --ignore='^/(work|tests|dist)($|/)'",
     "test:e2e": "node tests/electron.e2e.cjs",
     "test:environment": "node tests/environment.integration.cjs",
@@ -18,7 +18,8 @@
     "dist:win": "electron-builder --win --x64 --publish never",
     "dist:linux": "electron-builder --linux --x64 --publish never",
     "notarize": "node scripts/notarize-dmg.cjs",
-    "test:site": "node tests/site.e2e.cjs"
+    "test:site": "node tests/site.e2e.cjs",
+    "test:stream-math": "node tests/stream-math.e2e.cjs"
   },
   "devDependencies": {
     "@electron/packager": "^20.3.0",
@@ -31,6 +32,7 @@
     "dompurify": "^3.3.0",
     "fast-xml-parser": "^5.11.2",
     "fflate": "^0.8.3",
+    "katex": "^0.19.0",
     "marked": "^17.0.0",
     "pdf-parse": "^2.4.5"
   },
