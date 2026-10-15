@@ -18,6 +18,8 @@ mac:
   category: public.app-category.education
   icon: build/icon.icns
   hardenedRuntime: true
+  signIgnore:
+    - '\.pak$'
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
   identity: 'ZHIPING XU (5N66S29EK2)'
