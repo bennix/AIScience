@@ -47,7 +47,7 @@ jobs:
           gh release view "$GITHUB_REF_NAME" || gh release create "$GITHUB_REF_NAME" --title "AIScience $GITHUB_REF_NAME" --generate-notes
           for f in release/*.exe release/*.deb release/*.rpm; do
             if [ -f "$f" ]; then
-              sha256sum "$f" > "$f.sha256"
+              (cd release && sha256sum "$(basename "$f")") > "$f.sha256"
               gh release upload "$GITHUB_REF_NAME" "$f" "$f.sha256" --clobber
             fi
           done
